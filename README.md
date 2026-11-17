@@ -1,66 +1,43 @@
-# Console-Based Music Playlist Engine (Core Java)
+# MusicPlaylist (Java Console Project)
 
-A beginner-friendly, modular console application built using Core Java to manage, organize, and control music playlists with persistent file storage.
+## Requirements
+- Java 17 or newer (Java 26 is fine)
+- Maven
+- MySQL Server
 
----
-
-## 📌 Project Overview
-- **Language**: Java (JDK 8+)
-- **Architecture**: Object-Oriented (Model-Controller Separation)
-- **Persistence**: File I/O (`songs.txt`)
-- **Interface**: Interactive Console Menu
-
----
-
-## 🚀 Features
-1. **Add Song**: Adds song with ID, Title, Artist, and Duration. Prevents duplicate IDs.
-2. **Remove Song**: Removes a song by its unique ID.
-3. **Display Playlist**: Lists all songs in the current playlist queue.
-4. **Play Current Song**: Displays the currently active track.
-5. **Next / Previous Navigation**: Safely navigates tracks with boundary detection.
-6. **Shuffle Playlist**: Randomizes queue order using `Collections.shuffle()`.
-7. **Recently Played History**: Automatically logs the last 10 played songs using an `ArrayList` queue.
-8. **Search**: Case-insensitive search by Song Name or Artist.
-9. **Sort**: In-place Bubble sort implementation by Title (A-Z), Artist (A-Z), or Duration (shortest to longest).
-10. **File Persistence (Save & Auto-Load)**:
-    - Automatically loads saved songs from `songs.txt` when the program starts.
-    - Saves changes to `songs.txt` manually (Option 11) or automatically on exit (Option 12).
-11. **Safe Exit**: Graceful shutdown.
-
----
-
-## 🛠️ Class Structure
-
+## 1. Create the database
+Open MySQL and run:
+```sql
+CREATE DATABASE IF NOT EXISTS musicplaylist;
 ```
-MusicPlaylist/
-├── Song.java       # Model class: attributes, constructor, getters, display
-├── Playlist.java   # Data management: ArrayList, Bubble Sort, search, shuffle, File I/O
-├── Main.java       # Controller: menu loop, scanner input, navigation, history
-├── songs.txt       # File storage: persistent comma-separated text storage
-└── README.md       # Project documentation
+The application creates the `songs` and `play_history` tables automatically.
+
+## 2. Set MySQL password
+Open `src/main/resources/db.properties`.
+Set `db.user` and `db.password` to your local MySQL credentials.
+
+## 3. Build and run
+From the folder containing `pom.xml`:
+```powershell
+mvn clean package
+mvn exec:java
 ```
+The Maven Exec plugin is already configured with the correct main class.
 
----
+## Features
+- Add, view, search and delete songs
+- Store songs in MySQL using JDBC and PreparedStatement
+- Simulated playback on a separate Java thread
+- Pause, resume and stop playback
+- Listening history stored in MySQL
+- Basic input and database exception handling
 
-## 💻 How to Compile and Run
+Note: Playback is a console simulation; it does not play actual audio files.
 
-### 1. Compile
-```bash
-javac *.java
-```
+## Four-member work split
+1. Member 1 (project lead): `Main.java`, `Song.java`, menu and integration.
+2. Member 2: `DBConnection.java`, `DatabaseSetup.java`, `SongDAO.java`, MySQL/JDBC.
+3. Member 3: `PlaybackService.java`, playback thread, pause/resume/stop.
+4. Member 4: `HistoryDAO.java`, testing, README and documentation.
 
-### 2. Run
-```bash
-java Main
-```
-
----
-
-## 📚 Course Concepts Demonstrated
-- **Object-Oriented Programming (OOP)**: Encapsulation (`private` fields, `public` getters), Constructors.
-- **Java Collections Framework**: `ArrayList<Song>` dynamic storage and element traversal.
-- **File Handling & Persistence**: `File`, `FileWriter`, and `PrintWriter` for reading and writing `songs.txt`.
-- **Exception Handling**: `try-catch` blocks for robust File I/O error prevention.
-- **Algorithms**: In-place Bubble Sort using `.compareToIgnoreCase()`.
-- **String Manipulation**: `.toLowerCase()`, `.contains()`, and `.split(",")`.
-- **Console Input**: Clear handling of newline buffers with `scanner.nextLine()`.
+Each member should work on a separate Git branch and submit a pull request to `main`.

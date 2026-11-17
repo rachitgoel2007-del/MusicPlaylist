@@ -1,1 +1,6 @@
-﻿*.class
+target/
+.idea/
+.vscode/
+*.class
+
+src/main/resources/db.properties
