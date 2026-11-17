@@ -1,85 +1,58 @@
-
 package com.musicplaylist;
 
 public class PlaybackService {
 
     private Thread playbackThread;
-    private volatile boolean paused = false;
-    private volatile boolean stopped = false;
+    private boolean playing = false;
 
-    public synchronized void play(Song song) {
+    public void playSong(String songName) {
 
-        if (playbackThread != null && playbackThread.isAlive()) {
-            stop();
+        if (playing) {
+            System.out.println("A song is already playing!");
+            return;
         }
 
-        paused = false;
-        stopped = false;
+        playing = true;
 
-        playbackThread = new Thread(() -> {
+        playbackThread = new Thread(new Runnable() {
+            public void run() {
+                System.out.println("Now Playing: " + songName);
 
-            System.out.println("\nNow playing: " + song.getTitle()
-                    + " by " + song.getArtist());
+                for (int i = 1; i <= 10; i++) {
 
-            int duration = Math.max(5, Math.min(song.getDuration(), 30));
-
-            for (int second = 1; second <= duration; second++) {
-
-                synchronized (this) {
-
-                    while (paused && !stopped) {
-                        try {
-                            wait();
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                            return;
-                        }
+                    if (!playing) {
+                        System.out.println("Playback stopped.");
+                        return;
                     }
 
-                    if (stopped) {
+                    System.out.println("Playing... " + i + " sec");
+
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        System.out.println("Playback interrupted.");
+                        Thread.currentThread().interrupt();
                         return;
                     }
                 }
 
-                System.out.println("Playing... " + second + " sec");
-
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    if (stopped) {
-                        return;
-                    }
-                }
+                playing = false;
+                System.out.println("Song finished!");
             }
-
-            System.out.println("Playback finished.");
-
         });
 
-        playbackThread.setName("Music-Playback-Thread");
         playbackThread.start();
     }
 
-    public synchronized void pause() {
-        if (playbackThread != null && playbackThread.isAlive()) {
-            paused = true;
-            System.out.println("Playback paused.");
-        }
-    }
+    public void stopSong() {
+        playing = false;
 
-    public synchronized void resume() {
-        paused = false;
-        notifyAll();
-        System.out.println("Playback resumed.");
-    }
-
-    public synchronized void stop() {
-        if (playbackThread != null && playbackThread.isAlive()) {
-            stopped = true;
-            paused = false;
-            notifyAll();
+        if (playbackThread != null) {
             playbackThread.interrupt();
-            System.out.println("Playback stopped.");
         }
+    }
+
+    public boolean isPlaying() {
+        return playing;
     }
 }
