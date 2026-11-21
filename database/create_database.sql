@@ -1,1 +1,14 @@
-CREATE DATABASE IF NOT EXISTS musicplaylist;
+CREATE DATABASE IF NOT EXISTS music_playlist;
+USE music_playlist;
+CREATE TABLE IF NOT EXISTS songs (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(150) NOT NULL,
+  artist VARCHAR(150) NOT NULL,
+  duration_seconds INT NOT NULL CHECK (duration_seconds > 0)
+);
+CREATE TABLE IF NOT EXISTS play_history (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  song_id INT NOT NULL,
+  played_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_history_song FOREIGN KEY (song_id) REFERENCES songs(id) ON DELETE CASCADE
+);

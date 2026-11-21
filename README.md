@@ -1,43 +1,47 @@
-# MusicPlaylist (Java Console Project)
+# Music Playlist Engine
 
-## Requirements
-- Java 17 or newer (Java 26 is fine)
-- Maven
-- MySQL Server
-
-## 1. Create the database
-Open MySQL and run:
-```sql
-CREATE DATABASE IF NOT EXISTS musicplaylist;
-```
-The application creates the `songs` and `play_history` tables automatically.
-
-## 2. Set MySQL password
-Open `src/main/resources/db.properties`.
-Set `db.user` and `db.password` to your local MySQL credentials.
-
-## 3. Build and run
-From the folder containing `pom.xml`:
-```powershell
-mvn clean package
-mvn exec:java
-```
-The Maven Exec plugin is already configured with the correct main class.
+A Java 17 console application using Maven, MySQL, JDBC, OOP, collections, exception handling and multithreaded playback simulation.
 
 ## Features
-- Add, view, search and delete songs
-- Store songs in MySQL using JDBC and PreparedStatement
-- Simulated playback on a separate Java thread
-- Pause, resume and stop playback
-- Listening history stored in MySQL
-- Basic input and database exception handling
+- Add, list, search and delete songs
+- Create an in-memory playlist and add songs to it
+- Next/previous playback simulation with pause, resume and stop controls
+- Shuffle and sort playlist by title or artist
+- Save and view recent listening history in MySQL
 
-Note: Playback is a console simulation; it does not play actual audio files.
+## Requirements
+- JDK 17+
+- Maven 3.8+
+- MySQL 8+
 
-## Four-member work split
-1. Member 1 (project lead): `Main.java`, `Song.java`, menu and integration.
-2. Member 2: `DBConnection.java`, `DatabaseSetup.java`, `SongDAO.java`, MySQL/JDBC.
-3. Member 3: `PlaybackService.java`, playback thread, pause/resume/stop.
-4. Member 4: `HistoryDAO.java`, testing, README and documentation.
+## Database setup
+1. Start MySQL.
+2. Run `database/create_database.sql` in MySQL Workbench or the MySQL client.
+3. Configure environment variables before running:
+   - `MUSIC_DB_URL` (default `jdbc:mysql://localhost:3306/music_playlist`)
+   - `MUSIC_DB_USER` (default `root`)
+   - `MUSIC_DB_PASSWORD` (default empty)
 
-Each member should work on a separate Git branch and submit a pull request to `main`.
+PowerShell example (replace with your local password; do not commit it):
+```powershell
+$env:MUSIC_DB_URL="jdbc:mysql://localhost:3306/music_playlist"
+$env:MUSIC_DB_USER="root"
+$env:MUSIC_DB_PASSWORD="YOUR_LOCAL_PASSWORD"
+```
+
+## Build and run
+```powershell
+mvn clean compile
+mvn exec:java
+```
+
+## Notes
+Playback is a console simulation; it does not play actual audio. The playback worker runs on a background thread. The current playlist is held in memory for the running session; songs and listening history are stored in MySQL.
+
+## Team contribution plan
+- Rachit: application menu, playlist integration and final integration
+- Hriday: playback controls and multithreaded playback
+- Mannat: song model, song data access, search, sorting and shuffle
+- Tanvi: database setup, connection and listening history
+
+Each member should commit only the code they personally implement and test on their own branch.
