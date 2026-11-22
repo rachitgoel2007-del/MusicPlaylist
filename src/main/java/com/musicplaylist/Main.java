@@ -1,5 +1,6 @@
 package com.musicplaylist;
 
+import com.musicplaylist.service.PlaylistUndoService;
 import com.musicplaylist.db.DatabaseSetup;
 import com.musicplaylist.model.Playlist;
 import com.musicplaylist.model.Song;
@@ -16,6 +17,7 @@ public class Main {
     private static final HistoryDAO historyDAO = new HistoryDAO();
     private static final PlaybackService playback = new PlaybackService();
     private static final Playlist playlist = new Playlist("My Playlist");
+    private static final PlaylistUndoService undoService = new PlaylistUndoService();
 
     public static void main(String[] args) {
         try { DatabaseSetup.createTables(); }
@@ -42,6 +44,8 @@ public class Main {
                     case 13 -> { playlist.sortByTitle(); System.out.println("Sorted by title."); }
                     case 14 -> { playlist.sortByArtist(); System.out.println("Sorted by artist."); }
                     case 15 -> showHistory();
+                    case 16 -> removeSongFromPlaylist();
+                    case 17 -> undoPlaylistChange();
                     case 0 -> { playback.stop(); running = false; }
                     default -> System.out.println("Invalid choice.");
                 }
@@ -54,6 +58,7 @@ public class Main {
         System.out.println("5 Add song to playlist | 6 View playlist | 7 Next | 8 Previous");
         System.out.println("9 Pause | 10 Resume | 11 Stop | 12 Shuffle");
         System.out.println("13 Sort by title | 14 Sort by artist | 15 Listening history | 0 Exit");
+        System.out.println("16 Remove song from playlist | 17 Undo last change");
     }
     private static void addSong() throws SQLException {
         System.out.print("Title: "); String title = input.nextLine().trim();
@@ -66,9 +71,19 @@ public class Main {
     private static void searchSongs() throws SQLException { System.out.print("Search title/artist: "); printSongs(songDAO.search(input.nextLine().trim())); }
     private static void deleteSong() throws SQLException { int id = readInt("Song ID to delete: "); System.out.println(songDAO.delete(id) ? "Song deleted." : "Song ID not found."); }
     private static void addToPlaylist() throws SQLException {
-        int id = readInt("Song ID to add: ");
-        for (Song song : songDAO.getAll()) if (song.getId() == id) { playlist.addSong(song); System.out.println("Added to playlist."); return; }
-        System.out.println("Song ID not found.");
+    int id = readInt("Song ID to add: ");
+
+    for (Song song : songDAO.getAll()) {
+        if (song.getId() == id) {
+            undoService.saveState(playlist);
+            playlist.addSong(song);
+
+            System.out.println("Added to playlist.");
+            return;
+        }
+    }
+
+    System.out.println("Song ID not found.");
     }
     private static void showPlaylist() { System.out.println("\n" + playlist.getName()); printSongs(playlist.getSongs()); }
     private static void playNext() throws SQLException { play(playlist.next()); }
@@ -77,4 +92,34 @@ public class Main {
     private static void showHistory() throws SQLException { List<String> history = historyDAO.getRecent(); if (history.isEmpty()) System.out.println("No listening history yet."); else for (String row : history) System.out.println(row); }
     private static void printSongs(List<Song> songs) { if (songs.isEmpty()) System.out.println("No songs found."); else for (Song song : songs) System.out.println(song); }
     private static int readInt(String prompt) { while (true) { System.out.print(prompt); try { int value = Integer.parseInt(input.nextLine().trim()); return value; } catch (NumberFormatException e) { System.out.println("Please enter a number."); } } }
+    private static void removeSongFromPlaylist() {
+    int id = readInt("Song ID to remove: ");
+
+    boolean found = false;
+
+    for (Song song : playlist.getSongs()) {
+        if (song.getId() == id) {
+            found = true;
+            break;
+        }
+    }
+
+    if (found) {
+        undoService.saveState(playlist);
+        playlist.removeSong(id);
+        System.out.println("Song removed from playlist.");
+    } else {
+        System.out.println("Song not found in playlist.");
+    }
+
+    }
+
+    private static void undoPlaylistChange() {
+    if (undoService.undo(playlist)) {
+        System.out.println("Last playlist change undone.");
+    } else {
+        System.out.println("No previous change to undo.");
+    }
+
+    }
 }
