@@ -28,12 +28,17 @@ public class Playlist {
     }
 
     public boolean removeSong(int id) {
+
         for (int i = 0; i < songs.size(); i++) {
+
             if (songs.get(i).getId() == id) {
+
                 songs.remove(i);
 
                 if (songs.isEmpty()) {
                     currentIndex = -1;
+                } else if (i < currentIndex) {
+                    currentIndex--;
                 } else if (currentIndex >= songs.size()) {
                     currentIndex = songs.size() - 1;
                 }
@@ -45,7 +50,6 @@ public class Playlist {
         return false;
     }
 
-    // Restore an older playlist
     public void restoreSongs(List<Song> oldSongs) {
         songs.clear();
         songs.addAll(oldSongs);
@@ -53,20 +57,24 @@ public class Playlist {
     }
 
     public Song next() {
+
         if (songs.isEmpty()) {
             return null;
         }
 
         currentIndex = (currentIndex + 1) % songs.size();
+
         return songs.get(currentIndex);
     }
 
     public Song previous() {
+
         if (songs.isEmpty()) {
             return null;
         }
 
         currentIndex = (currentIndex - 1 + songs.size()) % songs.size();
+
         return songs.get(currentIndex);
     }
 
